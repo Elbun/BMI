@@ -206,5 +206,7 @@ st.altair_chart(fig)
 
 st.header("Closing")
 st.write('''
-        Closing statement.
+        Body Mass Index (BMI) is an useful indicator of measure fat accumulation in someone's body. The higher BMI
+        calculated show the higher fat accumulation in the body. By using BMI calculation, someone can examine his/her 
+        body fat contain and evaluate it whether it is already in caution zone or not.
     ''')
