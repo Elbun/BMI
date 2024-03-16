@@ -29,8 +29,10 @@ st.write('''
     A Body Mass Index (also known as BMI) is often used to diagnose obesity. To calculate BMI, divide weight in kilograms 
     by height in meters squared. A BMI over 25 is considered overweight and over 30 is obese.
          
-    Note : This section will show an example data of BMI group and how to predict others' BMI group
-''')
+    This section will show an example data of Index with its height and weight data details. Then how BMI is calculated
+    with data prepared. At the end, a rule of the BMI mapping will be shown to illustrate how the collaboration between
+    height and weight affect the Index.
+    ''')
 
 
 st.header("Dataset")
@@ -79,8 +81,7 @@ st.write('''
 scatter1 = alt.Chart(train_dataset).mark_point(size=20).encode(
     x=alt.X("BMI:Q", title="Body Mass Index").scale(zero=True),
     y=alt.Y("Index:Q", title="Index").scale(zero=True),
-    color=alt.Color("Gender", scale=alt. 
-        Scale(domain=['Male', 'Female'] , range=['#33F6FF', '#FF00C5'] )) 
+    color=alt.Color("Gender", scale=alt.Scale(domain=['Male', 'Female'] , range=['#33F6FF', '#FF00C5'] )) 
     )
 fig = (scatter1).configure_axis(
         labelFontSize=15
@@ -88,6 +89,11 @@ fig = (scatter1).configure_axis(
         title=('BMI vs Index'),
         width=650,
         height=400
+    ).configure_legend(
+        strokeColor='gray',
+        padding=10,
+        cornerRadius=10,
+        orient='bottom-right'
     )
 st.altair_chart(fig)
 
@@ -110,7 +116,7 @@ st.write('''
         explain what variable cause the other variable.
 
         Let's look again at plotted data above. If some pair of data are excluded from the dataset, it will show
-        a clear separation of group of BMI along with the Index. The data excluded are marked with red dot and 
+        a clear separation of group of BMI along with the Index. Exclude data with  red mark and then
         the separation group will follow this rule :
         - Index 0 (Extremely Weak) \t: BMI <= 15
         - Index 1 (Weak) : 15 < BMI <= 20
@@ -122,30 +128,83 @@ st.write('''
     ''')
 
 conditions = [
-    (train_dataset['Index'] == 0) & (train_dataset['BMI'] <= 15),
-    (train_dataset['Index'] == 1) & (train_dataset['BMI'] > 15) & (train_dataset['BMI'] <= 20),
-    (train_dataset['Index'] == 2) & (train_dataset['BMI'] > 20) & (train_dataset['BMI'] <= 25),
-    (train_dataset['Index'] == 3) & (train_dataset['BMI'] > 25) & (train_dataset['BMI'] <= 30),
-    (train_dataset['Index'] == 4) & (train_dataset['BMI'] > 30) & (train_dataset['BMI'] <= 40),
-    (train_dataset['Index'] == 5) & (train_dataset['BMI'] > 40)
+        (train_dataset['Index'] == 0) & (train_dataset['BMI'] <= 15),
+        (train_dataset['Index'] == 1) & (train_dataset['BMI'] > 15) & (train_dataset['BMI'] <= 20),
+        (train_dataset['Index'] == 2) & (train_dataset['BMI'] > 20) & (train_dataset['BMI'] <= 25),
+        (train_dataset['Index'] == 3) & (train_dataset['BMI'] > 25) & (train_dataset['BMI'] <= 30),
+        (train_dataset['Index'] == 4) & (train_dataset['BMI'] > 30) & (train_dataset['BMI'] <= 40),
+        (train_dataset['Index'] == 5) & (train_dataset['BMI'] > 40)
     ]
-values = ['include', 'include', 'include', 'include', 'include', 'include']
+values = ['Included', 'Included', 'Included', 'Included', 'Included', 'Included']
 train_dataset["Flag"] = np.select(conditions, values)
-train_dataset["Flag"] = np.where(train_dataset["Flag"] == "0", "exclude", train_dataset["Flag"])
+train_dataset["Flag"] = np.where(train_dataset["Flag"] == "0", "Excluded", train_dataset["Flag"])
 # st.table(train_dataset)   # Check data
 
 ## Chart 2 (scatter plot BMI vs Index with mark)
 scatter1 = alt.Chart(train_dataset).mark_point(size=20).encode(
     x=alt.X("BMI:Q", title="Body Mass Index").scale(zero=True),
     y=alt.Y("Index:Q", title="Index").scale(zero=True),
-    color=alt.Color("Flag", scale=alt. 
-        Scale(domain=['include', 'exclude'] , range=['#33F6FF', '#FF5858'] )) 
+    color=alt.Color("Flag", scale=alt.Scale(domain=['Included', 'Excluded'] , range=['#00C391', '#FF5858'] )) 
     )
 fig = (scatter1).configure_axis(
         labelFontSize=15
     ).properties(
-        title=('BMI vs Index (origin)'),
+        title=('BMI vs Index (with marked-excluded data)'),
+        width=650,
+        height=400
+    ).configure_legend(
+        strokeColor='gray',
+        padding=10,
+        cornerRadius=10,
+        orient='bottom-right'
+    )
+st.altair_chart(fig)
+
+
+st.header("Index Mapping")
+st.write('''
+        By using the defined rule for indexing the BMI, the Index can be mapped along with various weight and height.
+    ''')
+
+map_table = pd.Series(range(140,200))
+map_table = pd.DataFrame(map_table)
+map_table = map_table.rename(columns={0: "Height"})
+
+weight = pd.Series(range(50,160))
+weight = pd.DataFrame(weight)
+
+map_table = map_table.merge(weight, how='cross')
+map_table = map_table.rename(columns={0: "Weight"})
+map_table["BMI"] = map_table["Weight"] / ((map_table["Height"]/100)*(map_table["Height"]/100))
+
+map_conditions = [
+        (map_table['BMI'] <= 15),
+        (map_table['BMI'] > 15) & (map_table['BMI'] <= 20),
+        (map_table['BMI'] > 20) & (map_table['BMI'] <= 25),
+        (map_table['BMI'] > 25) & (map_table['BMI'] <= 30),
+        (map_table['BMI'] > 30) & (map_table['BMI'] <= 40),
+        (map_table['BMI'] > 40)
+    ]
+map_values = [0, 1, 2, 3, 4, 5]
+map_table["Index"] = np.select(map_conditions, map_values)
+
+## Chart 3 (scatter plot mapping index)
+scatter1 = alt.Chart(map_table).mark_point(size=40, filled=True).encode(
+    x=alt.X("Weight:Q", title="Weight (in kg)").scale(zero=False),
+    y=alt.Y("Height:Q", title="Height (in cm)").scale(zero=False),
+    color=alt.Color("Index", scale=alt.Scale(domain=[0,1,2,3,4,5] , range=['#50BAC6','#88D5E1','#A6BBC4','#C3A0A6','#E18689','#FF6B6B'] )) 
+    )
+fig = (scatter1).configure_axis(
+        labelFontSize=15
+    ).properties(
+        title=('BMI Category'),
         width=650,
         height=400
     )
 st.altair_chart(fig)
+
+
+st.header("Closing")
+st.write('''
+        Closing statement.
+    ''')
