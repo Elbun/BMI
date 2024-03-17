@@ -38,7 +38,7 @@ st.write('''
 st.header("Dataset")
 st.write('''
         The data used in this analysis is shown as below.
-        We show only the first 10 rows of data. The full dataset can be obtained from the source link.
+        The full dataset can be obtained from the source link.
     ''')
 st.link_button("Source Link", "https://www.kaggle.com/datasets/sjagkoo7/bmi-body-mass-index/data")
 st.table(train_dataset.head(10))
