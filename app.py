@@ -192,7 +192,7 @@ map_table["Index"] = np.select(map_conditions, map_values)
 scatter1 = alt.Chart(map_table).mark_point(size=40, filled=True).encode(
     x=alt.X("Weight:Q", title="Weight (in kg)").scale(zero=False),
     y=alt.Y("Height:Q", title="Height (in cm)").scale(zero=False),
-    color=alt.Color("Index", scale=alt.Scale(domain=[0,1,2,3,4,5] , range=['#50BAC6','#88D5E1','#A6BBC4','#C3A0A6','#E18689','#FF6B6B'] )) 
+    color=alt.Color("Index", scale=alt.Scale(domain=[0,1,2,3,4,5] , range=['#62B5FF','#62FFFD','#6CFF62','#FDFF62','#FFBA62','#FF6B6B'] )) 
     )
 fig = (scatter1).configure_axis(
         labelFontSize=15
