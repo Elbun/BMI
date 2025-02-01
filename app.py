@@ -135,10 +135,8 @@ conditions = [
         (train_dataset['Index'] == 4) & (train_dataset['BMI'] > 30) & (train_dataset['BMI'] <= 40),
         (train_dataset['Index'] == 5) & (train_dataset['BMI'] > 40)
     ]
-values = ['Included', 'Included', 'Included', 'Included', 'Included', 'Included']
-train_dataset["Flag"] = np.select(conditions, values)
-train_dataset["Flag"] = np.where(train_dataset["Flag"] == "0", "Excluded", train_dataset["Flag"])
-# st.table(train_dataset)   # Check data
+values = ['Included'] * len(conditions)
+train_dataset["Flag"] = np.select(conditions, values, default="Excluded")
 
 ## Chart 2 (scatter plot BMI vs Index with mark)
 scatter1 = alt.Chart(train_dataset).mark_point(size=20).encode(
